@@ -97,16 +97,16 @@ d3.csv("data/iris.csv").then((data) => {
       );
 
     // Add points
-    const myCircles1 = svg1.selectAll("circle")
-                            .data(data)
-                            .enter()
-                              .append("circle")
-                              .attr("id", (d) => d.id)
-                              .attr("cx", (d) => x1(d[xKey1]))
-                              .attr("cy", (d) => y1(d[yKey1]))
-                              .attr("r", 8)
-                              .style("fill", (d) => color(d.Species))
-                              .style("opacity", 0.5);
+    myCircles1 = svg1.selectAll("circle")
+                      .data(data)
+                      .enter()
+                        .append("circle")
+                        .attr("id", (d) => d.id)
+                        .attr("cx", (d) => x1(d[xKey1]))
+                        .attr("cy", (d) => y1(d[yKey1]))
+                        .attr("r", 8)
+                        .style("fill", (d) => color(d.Species))
+                        .style("opacity", 0.5);
 
     // Define a brush (call it brush1)
     let brush1 = d3.brush()
@@ -188,7 +188,77 @@ d3.csv("data/iris.csv").then((data) => {
 
   //TODO: Barchart with counts of different species
   {
-    // Bar chart code here 
+    // Set dimensions and margins for plots 
+    const width = 900; 
+    const height = 450; 
+    const margin = {left:50, right:50, bottom:50, top:50}; 
+
+
+    // TODO: What does this code do? 
+    const svg1 = d3
+      .select("#barchart") // select id 'hard-coded-bar'
+      .append("svg") // append to it an svg tag
+      .attr("width", width-margin.left-margin.right) // add a width to svg attributes
+      .attr("height", height - margin.top - margin.bottom) // add a height to svg attributes
+      .attr("viewBox", [0, 0, width, height]); // add viewBox as svg attribute
+
+    // Hardcoded barchart data
+    const data = [
+      {name: 'setosa', count: 50},
+      {name: 'versicolor', count: 50},
+      {name: 'virginica', count: 50},
+    ];
+    // returns the max Y1 value from data1
+    let maxY1 = d3.max(data, function(d) { return d.count; });
+
+    // returns the linear yScale for data1, transform data value to pixel value  
+    let yScale1 = d3.scaleLinear()
+                .domain([0,maxY1])
+                .range([height-margin.bottom,margin.top]); 
+
+    // returns the xScale for data1, transform data value to pixel value
+    let xScale1 = d3.scaleBand()
+                .domain(d3.range(data.length))
+                .range([margin.left, width - margin.right])
+                .padding(0.1); 
+
+    // adds a y-axis
+    svg1.append("g") // appends an empty tag
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .call(d3.axisLeft(yScale1)) 
+      .attr("font-size", '20px')
+      .call((g) => g.append("text")
+                      .attr("x", 0)
+                      .attr("y", margin.top - 20)
+                      .attr("fill", "black")
+                      .attr("text-anchor", "end")
+                      .text("Count")); 
+
+    // adds an x-axis
+    svg1.append("g")
+        .attr("transform", `translate(0,${height - margin.bottom})`)  // move axis to bottom of svg
+        .call(d3.axisBottom(xScale1) 
+                .tickFormat(i => data[i].name))   // built in function for bottom axis given a scale function 
+        .attr("font-size", '20px') // set font size
+        .call((g) => g.append("text")
+                      .attr("x", width - margin.right)
+                      .attr("y", margin.bottom - 4)
+                      .attr("fill", "black")
+                      .attr("text-anchor", "end")
+                      .text("Species"));
+    
+    
+    // adds a bar chart to the bar div with the x and y axes, and the tooltip functionality
+    svg1.selectAll(".bar") 
+    .data(data) 
+    .enter()  
+    .append("rect") 
+      .attr("class", "bar") 
+      .attr("x", (d,i) => xScale1(i)) 
+      .attr("y", (d) => yScale1(d.count)) 
+      .attr("height", (d) => (height - margin.bottom) - yScale1(d.count)) 
+      .attr("width", xScale1.bandwidth())
+      .style("fill", (d) => color(d.name))
   }
 
   //Brushing Code---------------------------------------------------------------------------------------------

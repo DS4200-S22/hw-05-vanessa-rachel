@@ -8,3 +8,9 @@ body {
   stroke: black;
   stroke-width: 1px;
 }
+
+#vis-holder {
+  display: flex;
+  flex-wrap: nowrap;
+  align-content: center;
+}
